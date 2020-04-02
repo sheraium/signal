@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace MPLC
 {
     public class Bit : IDataType
@@ -43,6 +45,38 @@ namespace MPLC
         public bool IsOff()
         {
             return !_mplc.GetBit(Address);
+        }
+
+        public async Task SetOnAsync()
+        {
+            await _mplc.SetBitOnAsync(Address);
+        }
+
+        public async Task SetOffAsync()
+        {
+            await _mplc.SetBitOffAsync(Address);
+        }
+
+        public async Task SetAsync(bool isOn)
+        {
+            if (isOn)
+            {
+                await _mplc.SetBitOnAsync(Address);
+            }
+            else
+            {
+                await _mplc.SetBitOffAsync(Address);
+            }
+        }
+
+        public async Task<bool> IsOnAsync()
+        {
+            return await _mplc.GetBitAsync(Address);
+        }
+
+        public async Task<bool> IsOffAsync()
+        {
+            return !await _mplc.GetBitAsync(Address);
         }
     }
 }
