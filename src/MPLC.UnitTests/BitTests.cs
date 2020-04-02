@@ -1,3 +1,4 @@
+using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -58,7 +59,7 @@ namespace MPLC.UnitTests
 
             var actual = _bit.IsOn();
 
-            Assert.IsTrue(actual);
+            actual.Should().BeTrue();
         }
 
 
@@ -69,7 +70,7 @@ namespace MPLC.UnitTests
 
             var actual = _bit.IsOff();
 
-            Assert.IsFalse(actual);
+            actual.Should().BeFalse();
         }
 
 
@@ -80,7 +81,7 @@ namespace MPLC.UnitTests
 
             var actual = _bit.Value;
 
-            Assert.AreEqual(1, actual);
+            actual.Should().Be(1);
         }
 
 
@@ -89,7 +90,7 @@ namespace MPLC.UnitTests
         {
             var actual = _bit.Address;
 
-            Assert.AreEqual(BitAddress, actual);
+            actual.Should().Be(BitAddress);
         }
     }
 }

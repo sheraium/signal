@@ -2,6 +2,10 @@ using System.Threading.Tasks;
 
 namespace MPLC
 {
+    /// <summary>
+    /// 1 bit
+    /// </summary>
+    /// <seealso cref="MPLC.IDataType" />
     public class Bit : IDataType
     {
         private readonly IMPLCProvider _mplc;

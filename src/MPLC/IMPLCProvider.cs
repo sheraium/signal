@@ -8,6 +8,10 @@ namespace MPLC
 
         Task<bool> GetBitAsync(string address);
 
+        int ReadWord(string address);
+
+        Task<int> ReadWordAsync(string address);
+
         void SetBitOff(string address);
 
         Task SetBitOffAsync(string address);
@@ -15,5 +19,9 @@ namespace MPLC
         void SetBitOn(string address);
 
         Task SetBitOnAsync(string address);
+
+        void WriteWord(string address, int value);
+
+        Task WriteWordAsync(string address, int value);
     }
 }
