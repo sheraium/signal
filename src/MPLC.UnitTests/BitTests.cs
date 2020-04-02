@@ -56,7 +56,7 @@ namespace MPLC.UnitTests
         {
             _mplc.GetBit(BitAddress).Returns(true);
 
-            var actual = _bit.IsOn;
+            var actual = _bit.IsOn();
 
             Assert.IsTrue(actual);
         }
@@ -67,7 +67,7 @@ namespace MPLC.UnitTests
         {
             _mplc.GetBit(BitAddress).Returns(true);
 
-            var actual = _bit.IsOff;
+            var actual = _bit.IsOff();
 
             Assert.IsFalse(actual);
         }
