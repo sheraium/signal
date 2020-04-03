@@ -12,6 +12,10 @@ namespace MPLC
 
         Task<int> ReadWordAsync(string address);
 
+        int[] ReadWords(string startAddress, int length);
+
+        Task<int[]> ReadWordsAsync(string startAddress, int length);
+
         void SetBitOff(string address);
 
         Task SetBitOffAsync(string address);
@@ -23,5 +27,9 @@ namespace MPLC
         void WriteWord(string address, int value);
 
         Task WriteWordAsync(string address, int value);
+
+        void WriteWords(string startAddress, int[] words);
+
+        Task WriteWordsAsync(string startAddress, int[] words);
     }
 }
