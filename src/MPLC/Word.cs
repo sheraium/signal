@@ -52,7 +52,7 @@ namespace MPLC
             bitArray.Set(index, isOn);
             var bytes = new byte[4];
             bitArray.CopyTo(bytes, 0);
-            SetValue(BitConverter.ToInt16(bytes));
+            SetValue(BitConverter.ToUInt16(bytes, 0));
         }
 
         public async Task SetBitAsync(int index, bool isOn)
@@ -62,7 +62,7 @@ namespace MPLC
             bitArray.Set(index, isOn);
             var bytes = new byte[4];
             bitArray.CopyTo(bytes, 0);
-            SetValue(BitConverter.ToInt16(bytes));
+            SetValue(BitConverter.ToUInt16(bytes, 0));
         }
 
         public void SetValue(int value)
