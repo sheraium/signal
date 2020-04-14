@@ -40,9 +40,9 @@ namespace MPLC
             return _mplc.ReadWord(_address);
         }
 
-        public async Task<int> GetValueAsync()
+        public Task<int> GetValueAsync()
         {
-            return await _mplc.ReadWordAsync(_address);
+            return _mplc.ReadWordAsync(_address);
         }
 
         public void SetBit(int index, bool isOn)
@@ -70,9 +70,9 @@ namespace MPLC
             _mplc.WriteWord(_address, value);
         }
 
-        public async Task SetValueAsync(int value)
+        public Task SetValueAsync(int value)
         {
-            await _mplc.WriteWordAsync(_address, value);
+            return _mplc.WriteWordAsync(_address, value);
         }
     }
 }

@@ -21,9 +21,9 @@ namespace MPLC
             return _mplc.ReadWords(_startAddress, _length);
         }
 
-        public async Task<int[]> GetDataAsync()
+        public Task<int[]> GetDataAsync()
         {
-            return await _mplc.ReadWordsAsync(_startAddress, _length);
+            return _mplc.ReadWordsAsync(_startAddress, _length);
         }
 
         public void SetData(int[] data)
@@ -31,9 +31,9 @@ namespace MPLC
             _mplc.WriteWords(_startAddress, data.Take(_length).ToArray());
         }
 
-        public async Task SetDataAsync(int[] data)
+        public Task SetDataAsync(int[] data)
         {
-            await _mplc.WriteWordsAsync(_startAddress, data.Take(_length).ToArray());
+            return _mplc.WriteWordsAsync(_startAddress, data.Take(_length).ToArray());
         }
     }
 }

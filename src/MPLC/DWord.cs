@@ -37,9 +37,9 @@ namespace MPLC
             _mplc.WriteWords(_address, new[] { value % 65536, value / 65536 });
         }
 
-        public async Task SetValueAsync(int value)
+        public Task SetValueAsync(int value)
         {
-            await _mplc.WriteWordsAsync(_address, new[] { value % 65536, value / 65536 });
+            return _mplc.WriteWordsAsync(_address, new[] { value % 65536, value / 65536 });
         }
     }
 }

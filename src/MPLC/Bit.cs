@@ -51,36 +51,36 @@ namespace MPLC
             return !_mplc.GetBit(Address);
         }
 
-        public async Task SetOnAsync()
+        public Task SetOnAsync()
         {
-            await _mplc.SetBitOnAsync(Address);
+            return _mplc.SetBitOnAsync(Address);
         }
 
-        public async Task SetOffAsync()
+        public Task SetOffAsync()
         {
-            await _mplc.SetBitOffAsync(Address);
+            return _mplc.SetBitOffAsync(Address);
         }
 
-        public async Task SetAsync(bool isOn)
+        public Task SetAsync(bool isOn)
         {
             if (isOn)
             {
-                await _mplc.SetBitOnAsync(Address);
+                return _mplc.SetBitOnAsync(Address);
             }
             else
             {
-                await _mplc.SetBitOffAsync(Address);
+                return _mplc.SetBitOffAsync(Address);
             }
         }
 
-        public async Task<bool> IsOnAsync()
+        public Task<bool> IsOnAsync()
         {
-            return await _mplc.GetBitAsync(Address);
+            return _mplc.GetBitAsync(Address);
         }
 
         public async Task<bool> IsOffAsync()
         {
-            return !await _mplc.GetBitAsync(Address);
+            return !(await _mplc.GetBitAsync(Address));
         }
     }
 }

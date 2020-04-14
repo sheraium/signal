@@ -30,8 +30,8 @@ namespace MPLC
         {
             foreach (var item in Blocks)
             {
-                var (successed, value) = await item.Value.TryGetBitAsync(address);
-                if (successed)
+                var (succeeded, value) = await item.Value.TryGetBitAsync(address);
+                if (succeeded)
                 {
                     return value;
                 }
@@ -55,8 +55,8 @@ namespace MPLC
         {
             foreach (var item in Blocks)
             {
-                var (successed, value) = await item.Value.TryGetWordAsync(address);
-                if (successed)
+                var (succeeded, value) = await item.Value.TryGetWordAsync(address);
+                if (succeeded)
                 {
                     return value;
                 }
@@ -80,8 +80,8 @@ namespace MPLC
         {
             foreach (var item in Blocks)
             {
-                var (successed, value) = await item.Value.TryGetWordsAsync(startAddress, length);
-                if (successed)
+                var (succeeded, value) = await item.Value.TryGetWordsAsync(startAddress, length);
+                if (succeeded)
                 {
                     return value;
                 }
