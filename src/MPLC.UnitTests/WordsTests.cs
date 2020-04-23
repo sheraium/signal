@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -19,23 +20,23 @@ namespace MPLC.UnitTests
         }
 
         [Test]
-        public void set_data()
+        public async Task get_data()
         {
-            _words.SetData(new[] { 1, 2 });
+            _mplc.ReadWordsAsync(StartAddress, 2).Returns(new[] { 1, 2 });
 
-            _mplc.Received().WriteWords(StartAddress, Arg.Is<int[]>(x =>
-                x[0] == 1 &&
-                x[1] == 2));
+            var actual = await _words.GetDataAsync();
+
+            actual.Should().BeEquivalentTo(new[] { 1, 2 });
         }
 
         [Test]
-        public void get_data()
+        public void set_data()
         {
-            _mplc.ReadWords(StartAddress, 2).Returns(new[] { 1, 2 });
+            _words.SetDataAsync(new[] { 1, 2 });
 
-            var actual = _words.GetData();
-
-            actual.Should().BeEquivalentTo(new[] { 1, 2 });
+            _mplc.Received().WriteWordsAsync(StartAddress, Arg.Is<int[]>(x =>
+                x[0] == 1 &&
+                x[1] == 2));
         }
     }
 }

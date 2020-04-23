@@ -16,49 +16,16 @@ namespace MPLC
             Address = address;
         }
 
-        public double Value => IsOn() ? 1 : 0;
         public string Address { get; }
 
-        public void SetOn()
+        public async Task<bool> IsOffAsync()
         {
-            _mplc.SetBitOn(Address);
+            return !(await _mplc.GetBitAsync(Address));
         }
 
-        public void SetOff()
+        public Task<bool> IsOnAsync()
         {
-            _mplc.SetBitOff(Address);
-        }
-
-        public void Set(bool isOn)
-        {
-            if (isOn)
-            {
-                _mplc.SetBitOn(Address);
-            }
-            else
-            {
-                _mplc.SetBitOff(Address);
-            }
-        }
-
-        public bool IsOn()
-        {
-            return _mplc.GetBit(Address);
-        }
-
-        public bool IsOff()
-        {
-            return !_mplc.GetBit(Address);
-        }
-
-        public Task SetOnAsync()
-        {
-            return _mplc.SetBitOnAsync(Address);
-        }
-
-        public Task SetOffAsync()
-        {
-            return _mplc.SetBitOffAsync(Address);
+            return _mplc.GetBitAsync(Address);
         }
 
         public Task SetAsync(bool isOn)
@@ -73,14 +40,14 @@ namespace MPLC
             }
         }
 
-        public Task<bool> IsOnAsync()
+        public Task SetOffAsync()
         {
-            return _mplc.GetBitAsync(Address);
+            return _mplc.SetBitOffAsync(Address);
         }
 
-        public async Task<bool> IsOffAsync()
+        public Task SetOnAsync()
         {
-            return !(await _mplc.GetBitAsync(Address));
+            return _mplc.SetBitOnAsync(Address);
         }
     }
 }

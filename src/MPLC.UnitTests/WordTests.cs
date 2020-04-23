@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -12,70 +13,51 @@ namespace MPLC.UnitTests
         private IMPLCProvider _mplc;
         private Word _word;
 
-        [SetUp]
-        public void SetUp()
-        {
-            _mplc = Substitute.For<IMPLCProvider>();
-            _word = new Word(_mplc, "D100");
-        }
-
         [Test]
-        public void set_value()
+        public async Task get_bit()
         {
-            _word.SetValue(Value);
-
-            _mplc.Received().WriteWord(WordAddress, Value);
-        }
-
-
-        [Test]
-        public void get_value()
-        {
-            _mplc.ReadWord(WordAddress).Returns(Value);
-
-            var actual = _word.GetValue();
-
-            actual.Should().Be(Value);
-        }
-
-        [Test]
-        public void value()
-        {
-            _mplc.ReadWord(WordAddress).Returns(Value);
-
-            var actual = _word.Value;
-
-            actual.Should().Be(Value);
-        }
-
-        [Test]
-        public void address()
-        {
-            var actual = _word.Address;
-
-            actual.Should().Be(WordAddress);
-        }
-
-        [Test]
-        public void get_bit()
-        {
-            _mplc.ReadWord(WordAddress).Returns(Value);
+            _mplc.ReadWordAsync(WordAddress).Returns(Value);
 
             var index = 0;
-            var actual = _word.GetBit(index);
+            var actual = await _word.GetBitAsync(index);
 
             actual.Should().BeTrue();
         }
 
         [Test]
-        public void set_bit()
+        public async Task get_value()
         {
-            _mplc.ReadWord(WordAddress).Returns(1);
+            _mplc.ReadWordAsync(WordAddress).Returns(Value);
+
+            var actual = await _word.GetValueAsync();
+
+            actual.Should().Be(Value);
+        }
+
+        [Test]
+        public async Task set_bit()
+        {
+            _mplc.ReadWordAsync(WordAddress).Returns(1);
 
             var index = 1;
-            _word.SetBit(index, true);
+            await _word.SetBitAsync(index, true);
 
-            _mplc.Received().WriteWord(Arg.Is(WordAddress), Arg.Is(3));
+            await _mplc.Received().WriteWordAsync(Arg.Is(WordAddress), Arg.Is(3));
+        }
+
+        [Test]
+        public void set_value()
+        {
+            _word.SetValueAsync(Value);
+
+            _mplc.Received().WriteWordAsync(WordAddress, Value);
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            _mplc = Substitute.For<IMPLCProvider>();
+            _word = new Word(_mplc, "D100");
         }
     }
 }
