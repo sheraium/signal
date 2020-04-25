@@ -55,24 +55,11 @@ namespace MPLC
             throw new InvalidOperationException("no match block");
         }
 
-        public virtual async Task SetBitOffAsync(string address)
+        public virtual async Task SetBitAsync(string address, bool isOn)
         {
             foreach (var item in Blocks)
             {
-                if (await item.Value.TrySetBitOffAsync(address))
-                {
-                    return;
-                }
-            }
-
-            throw new InvalidOperationException("no match block");
-        }
-
-        public virtual async Task SetBitOnAsync(string address)
-        {
-            foreach (var item in Blocks)
-            {
-                if (await item.Value.TrySetBitOnAsync(address))
+                if (await item.Value.TrySetBitAsync(address, isOn))
                 {
                     return;
                 }

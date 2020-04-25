@@ -40,21 +40,21 @@ namespace MPLC.UnitTests
         [Test]
         public async Task set_bit_on()
         {
-            _blockB.TrySetBitOnAsync("B0")
+            _blockB.TrySetBitAsync("B0", true)
                 .Returns(true);
 
-            await _mplc.SetBitOnAsync("B0");
+            await _mplc.SetBitAsync("B0", true);
 
-            await _blockB.Received().TrySetBitOnAsync(Arg.Is("B0"));
+            await _blockB.Received().TrySetBitAsync(Arg.Is("B0"), Arg.Is(true));
         }
 
         [Test]
         public void set_bit_on_fail()
         {
-            _blockB.TrySetBitOnAsync("B0")
+            _blockB.TrySetBitAsync("B0", true)
                 .Returns(true);
 
-            Func<Task> act = async () => await _mplc.SetBitOnAsync("B1");
+            Func<Task> act = async () => await _mplc.SetBitAsync("B1", false);
 
             act.Should().Throw<InvalidOperationException>()
                 .Where(e => e.Message.Contains("no match block"));
@@ -63,21 +63,21 @@ namespace MPLC.UnitTests
         [Test]
         public async Task set_bit_off()
         {
-            _blockB.TrySetBitOffAsync("B0")
+            _blockB.TrySetBitAsync("B0", false)
                 .Returns(true);
 
-            await _mplc.SetBitOffAsync("B0");
+            await _mplc.SetBitAsync("B0", false);
 
-            await _blockB.Received().TrySetBitOffAsync(Arg.Is("B0"));
+            await _blockB.Received().TrySetBitAsync(Arg.Is("B0"), Arg.Is(false));
         }
 
         [Test]
         public void set_bit_off_fail()
         {
-            _blockB.TrySetBitOffAsync("B0")
+            _blockB.TrySetBitAsync("B0", false)
                 .Returns(true);
 
-            Func<Task> act = async () => await _mplc.SetBitOffAsync("B1");
+            Func<Task> act = async () => await _mplc.SetBitAsync("B1", false);
 
             act.Should().Throw<InvalidOperationException>()
                 .Where(e => e.Message.Contains("no match block"));

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 namespace MPLC
 {
     /// <summary>
-    /// 1 bit
+    ///     1 bit
     /// </summary>
     /// <seealso cref="MPLC.IDataType" />
     public class Bit : IDataType
@@ -20,7 +20,7 @@ namespace MPLC
 
         public async Task<bool> IsOffAsync()
         {
-            return !(await _mplc.GetBitAsync(Address));
+            return !await _mplc.GetBitAsync(Address);
         }
 
         public Task<bool> IsOnAsync()
@@ -30,24 +30,17 @@ namespace MPLC
 
         public Task SetAsync(bool isOn)
         {
-            if (isOn)
-            {
-                return _mplc.SetBitOnAsync(Address);
-            }
-            else
-            {
-                return _mplc.SetBitOffAsync(Address);
-            }
+            return _mplc.SetBitAsync(Address, isOn);
         }
 
         public Task SetOffAsync()
         {
-            return _mplc.SetBitOffAsync(Address);
+            return _mplc.SetBitAsync(Address, false);
         }
 
         public Task SetOnAsync()
         {
-            return _mplc.SetBitOnAsync(Address);
+            return _mplc.SetBitAsync(Address, true);
         }
     }
 }

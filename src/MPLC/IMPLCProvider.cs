@@ -10,9 +10,7 @@ namespace MPLC
 
         Task<int[]> ReadWordsAsync(string startAddress, int length);
 
-        Task SetBitOffAsync(string address);
-
-        Task SetBitOnAsync(string address);
+        Task SetBitAsync(string address, bool isOn);
 
         Task WriteWordAsync(string address, int value);
 
