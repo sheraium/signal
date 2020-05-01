@@ -16,24 +16,14 @@ namespace MPLC
             _length = length >= 1 ? length : 1;
         }
 
-        public int[] GetData()
+        public Task<int[]> GetDataAsync()
         {
-            return _mplc.ReadWords(_startAddress, _length);
+            return _mplc.ReadWordsAsync(_startAddress, _length);
         }
 
-        public async Task<int[]> GetDataAsync()
+        public Task SetDataAsync(int[] data)
         {
-            return await _mplc.ReadWordsAsync(_startAddress, _length);
-        }
-
-        public void SetData(int[] data)
-        {
-            _mplc.WriteWords(_startAddress, data.Take(_length).ToArray());
-        }
-
-        public async Task SetDataAsync(int[] data)
-        {
-            await _mplc.WriteWordsAsync(_startAddress, data.Take(_length).ToArray());
+            return _mplc.WriteWordsAsync(_startAddress, data.Take(_length).ToArray());
         }
     }
 }

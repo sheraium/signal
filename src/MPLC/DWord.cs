@@ -18,13 +18,6 @@ namespace MPLC
         }
 
         public string Address => _address;
-        public double Value => GetValue();
-
-        public int GetValue()
-        {
-            var words = _mplc.ReadWords(_address, 2);
-            return words[0] + words[1] * 65536;
-        }
 
         public async Task<int> GetValueAsync()
         {
@@ -32,14 +25,9 @@ namespace MPLC
             return words[0] + words[1] * 65536;
         }
 
-        public void SetValue(int value)
+        public Task SetValueAsync(int value)
         {
-            _mplc.WriteWords(_address, new[] { value % 65536, value / 65536 });
-        }
-
-        public async Task SetValueAsync(int value)
-        {
-            await _mplc.WriteWordsAsync(_address, new[] { value % 65536, value / 65536 });
+            return _mplc.WriteWordsAsync(_address, new[] { value % 65536, value / 65536 });
         }
     }
 }

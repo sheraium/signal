@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -19,23 +20,41 @@ namespace MPLC.UnitTests
         }
 
         [Test]
-        public void set_data()
+        public async Task get_data()
         {
-            _words.SetData(new[] { 1, 2 });
-
-            _mplc.Received().WriteWords(StartAddress, Arg.Is<int[]>(x =>
-                x[0] == 1 &&
-                x[1] == 2));
+            GivenData(new[] { 1, 2 });
+            await DataShouldBe(new[] { 1, 2 });
         }
 
         [Test]
-        public void get_data()
+        public async Task set_data()
         {
-            _mplc.ReadWords(StartAddress, 2).Returns(new[] { 1, 2 });
+            WhenSetData(new[] { 1, 2 });
+            await MPLCShouldWriteWords(new[] { 1, 2 });
+        }
 
-            var actual = _words.GetData();
+        private async Task DataShouldBe(int[] expected)
+        {
+            var actual = await _words.GetDataAsync();
 
-            actual.Should().BeEquivalentTo(new[] { 1, 2 });
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        private void GivenData(int[] data)
+        {
+            _mplc.ReadWordsAsync(StartAddress, 2).Returns(data);
+        }
+
+        private async Task MPLCShouldWriteWords(int[] data)
+        {
+            await _mplc.Received().WriteWordsAsync(StartAddress, Arg.Is<int[]>(x =>
+                x[0] == data[0] &&
+                x[1] == data[1]));
+        }
+
+        private void WhenSetData(int[] data)
+        {
+            _words.SetDataAsync(data);
         }
     }
 }

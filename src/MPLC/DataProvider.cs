@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace MPLC
@@ -14,65 +13,31 @@ namespace MPLC
             Blocks.TryAdd(block.Name, block);
         }
 
-        public virtual bool GetBit(string address)
-        {
-            foreach (var item in Blocks)
-            {
-                if (item.Value.TryGetBit(address, out var value))
-                {
-                    return value;
-                }
-            }
-            return false;
-        }
-
         public virtual async Task<bool> GetBitAsync(string address)
         {
             foreach (var item in Blocks)
             {
-                var (successed, value) = await item.Value.TryGetBitAsync(address);
-                if (successed)
+                var (succeeded, value) = await item.Value.TryGetBitAsync(address);
+                if (succeeded)
                 {
                     return value;
                 }
             }
-            return false;
-        }
 
-        public virtual int ReadWord(string address)
-        {
-            foreach (var item in Blocks)
-            {
-                if (item.Value.TryGetWord(address, out var value))
-                {
-                    return value;
-                }
-            }
-            throw new InvalidOperationException("no match block");
+            return false;
         }
 
         public virtual async Task<int> ReadWordAsync(string address)
         {
             foreach (var item in Blocks)
             {
-                var (successed, value) = await item.Value.TryGetWordAsync(address);
-                if (successed)
+                var (succeeded, value) = await item.Value.TryGetWordAsync(address);
+                if (succeeded)
                 {
                     return value;
                 }
             }
-            throw new InvalidOperationException("no match block");
-        }
 
-        public virtual int[] ReadWords(string startAddress, int length)
-        {
-            foreach (var item in Blocks)
-            {
-                if (item.Value.TryGetWords(startAddress, length, out var value))
-                {
-                    return value;
-                }
-            }
             throw new InvalidOperationException("no match block");
         }
 
@@ -80,61 +45,27 @@ namespace MPLC
         {
             foreach (var item in Blocks)
             {
-                var (successed, value) = await item.Value.TryGetWordsAsync(startAddress, length);
-                if (successed)
+                var (succeeded, value) = await item.Value.TryGetWordsAsync(startAddress, length);
+                if (succeeded)
                 {
                     return value;
                 }
             }
+
             throw new InvalidOperationException("no match block");
         }
 
-        public virtual void SetBitOff(string address)
-        {
-            if (!Blocks.Any(item => item.Value.TrySetBitOff(address)))
-            {
-                throw new InvalidOperationException("no match block");
-            }
-        }
-
-        public virtual async Task SetBitOffAsync(string address)
+        public virtual async Task SetBitAsync(string address, bool isOn)
         {
             foreach (var item in Blocks)
             {
-                if (await item.Value.TrySetBitOffAsync(address))
+                if (await item.Value.TrySetBitAsync(address, isOn))
                 {
                     return;
                 }
             }
+
             throw new InvalidOperationException("no match block");
-        }
-
-        public virtual void SetBitOn(string address)
-        {
-            if (!Blocks.Any(item => item.Value.TrySetBitOn(address)))
-            {
-                throw new InvalidOperationException("no match block");
-            }
-        }
-
-        public virtual async Task SetBitOnAsync(string address)
-        {
-            foreach (var item in Blocks)
-            {
-                if (await item.Value.TrySetBitOnAsync(address))
-                {
-                    return;
-                }
-            }
-            throw new InvalidOperationException("no match block");
-        }
-
-        public virtual void WriteWord(string address, int value)
-        {
-            if (!Blocks.Any(item => item.Value.TrySetWord(address, value)))
-            {
-                throw new InvalidOperationException("no match block");
-            }
         }
 
         public virtual async Task WriteWordAsync(string address, int value)
@@ -146,15 +77,8 @@ namespace MPLC
                     return;
                 }
             }
-            throw new InvalidOperationException("no match block");
-        }
 
-        public virtual void WriteWords(string startAddress, int[] words)
-        {
-            if (!Blocks.Any(item => item.Value.TrySetWords(startAddress, words)))
-            {
-                throw new InvalidOperationException("no match block");
-            }
+            throw new InvalidOperationException("no match block");
         }
 
         public virtual async Task WriteWordsAsync(string startAddress, int[] words)
@@ -166,6 +90,7 @@ namespace MPLC
                     return;
                 }
             }
+
             throw new InvalidOperationException("no match block");
         }
     }

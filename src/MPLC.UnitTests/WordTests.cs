@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -7,8 +8,8 @@ namespace MPLC.UnitTests
     [TestFixture]
     public class WordTests
     {
-        private const int Value = 1;
         private const string WordAddress = "D100";
+        private const bool On = true;
         private IMPLCProvider _mplc;
         private Word _word;
 
@@ -20,62 +21,65 @@ namespace MPLC.UnitTests
         }
 
         [Test]
-        public void set_value()
+        public async Task get_bit()
         {
-            _word.SetValue(Value);
-
-            _mplc.Received().WriteWord(WordAddress, Value);
-        }
-
-
-        [Test]
-        public void get_value()
-        {
-            _mplc.ReadWord(WordAddress).Returns(Value);
-
-            var actual = _word.GetValue();
-
-            actual.Should().Be(Value);
+            GivenWord(WordAddress, 1);
+            await BitShouldBe(0, On);
         }
 
         [Test]
-        public void value()
+        public async Task get_value()
         {
-            _mplc.ReadWord(WordAddress).Returns(Value);
-
-            var actual = _word.Value;
-
-            actual.Should().Be(Value);
+            GivenWord(WordAddress, 1);
+            await ValueShouldBe(1);
         }
 
         [Test]
-        public void address()
+        public async Task set_bit()
         {
-            var actual = _word.Address;
-
-            actual.Should().Be(WordAddress);
+            await WhenSetBit(0, On);
+            await MPLCShouldWriteWord(WordAddress, 1);
         }
 
         [Test]
-        public void get_bit()
+        public async Task set_value()
         {
-            _mplc.ReadWord(WordAddress).Returns(Value);
-
-            var index = 0;
-            var actual = _word.GetBit(index);
-
-            actual.Should().BeTrue();
+            WhenSet(1);
+            await MPLCShouldWriteWord(WordAddress, 1);
         }
 
-        [Test]
-        public void set_bit()
+        private async Task BitShouldBe(int index, bool expected)
         {
-            _mplc.ReadWord(WordAddress).Returns(1);
+            var actual = await _word.GetBitAsync(index);
 
-            var index = 1;
-            _word.SetBit(index, true);
+            actual.Should().Be(expected);
+        }
 
-            _mplc.Received().WriteWord(Arg.Is(WordAddress), Arg.Is(3));
+        private void GivenWord(string address, int value)
+        {
+            _mplc.ReadWordAsync(address).Returns(value);
+        }
+
+        private async Task MPLCShouldWriteWord(string address, int value)
+        {
+            await _mplc.Received().WriteWordAsync(Arg.Is(address), Arg.Is(value));
+        }
+
+        private async Task ValueShouldBe(int expected)
+        {
+            var actual = await _word.GetValueAsync();
+
+            actual.Should().Be(expected);
+        }
+
+        private void WhenSet(int value)
+        {
+            _word.SetValueAsync(value);
+        }
+
+        private async Task WhenSetBit(int index, bool isOn)
+        {
+            await _word.SetBitAsync(index, isOn);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Threading.Tasks;
+using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -7,9 +8,9 @@ namespace MPLC.UnitTests
     [TestFixture]
     public class DWordTests
     {
-        private IMPLCProvider _mplc;
-        private DWord _dWord;
         private const string StartAddress = "D100";
+        private DWord _dWord;
+        private IMPLCProvider _mplc;
 
         [SetUp]
         public void SetUp()
@@ -19,23 +20,41 @@ namespace MPLC.UnitTests
         }
 
         [Test]
-        public void set_value()
+        public async Task get_value()
         {
-            _dWord.SetValue(65536);
-
-            _mplc.Received().WriteWords(StartAddress, Arg.Is<int[]>(x =>
-                x[0] == 0 &&
-                x[1] == 1));
+            GivenDword(StartAddress, 65536);
+            await ValueShouldBe(65536);
         }
 
         [Test]
-        public void get_value()
+        public async Task set_value()
         {
-            _mplc.ReadWords(StartAddress, 2).Returns(new[] { 0, 1 });
+            WhenSetValue(65536);
+            await MPLCShouldWriteWords(StartAddress, new[] { 0, 1 });
+        }
 
-            var actual = _dWord.GetValue();
+        private void GivenDword(string startAddress, int value)
+        {
+            _mplc.ReadWordsAsync(startAddress, 2).Returns(new[] { value % 65536, value / 65536 });
+        }
 
-            actual.Should().Be(65536);
+        private async Task MPLCShouldWriteWords(string address, int[] value)
+        {
+            await _mplc.Received().WriteWordsAsync(address, Arg.Is<int[]>(x =>
+                x[0] == value[0] &&
+                x[1] == value[1]));
+        }
+
+        private async Task ValueShouldBe(int expected)
+        {
+            var actual = await _dWord.GetValueAsync();
+
+            actual.Should().Be(expected);
+        }
+
+        private void WhenSetValue(int value)
+        {
+            _dWord.SetValueAsync(value);
         }
     }
 }

@@ -9,6 +9,8 @@ namespace MPLC.UnitTests
     [TestFixture]
     public class DataProviderTests
     {
+        private const bool On = true;
+        private const bool Off = false;
         private DataProvider _mplc;
         private IDataBlock _blockB;
         private IDataBlock _blockD;
@@ -26,241 +28,202 @@ namespace MPLC.UnitTests
         }
 
         [Test]
-        public void get_bit()
+        public async Task blockB_get_bit()
         {
-            _blockB.TryGetBit("B0", out Arg.Any<bool>())
-                .Returns(param =>
-                {
-                    param[1] = true;
-                    return true;
-                });
-
-            var actual = _mplc.GetBit("B0");
-
-            actual.Should().BeTrue();
+            GivenBlockB("B0", On);
+            await BitShouldBe("B0", On);
         }
 
         [Test]
-        public async Task get_bit_async()
+        public async Task blockB_set_bit_off()
         {
-            _blockD.TryGetBitAsync("D10.1")
-                .Returns((true, true));
-
-            var actual = await _mplc.GetBitAsync("D10.1");
-
-            actual.Should().BeTrue();
+            await WhenBlockBSetBit("B0", Off);
+            await BlockShouldSetBit("B0", Off);
         }
 
         [Test]
-        public void set_bit_on()
+        public void blockB_set_bit_off_fail()
         {
-            _blockB.TrySetBitOn("B0")
+            SetBitShouldThrowException("B0", Off);
+        }
+
+        [Test]
+        public async Task blockB_set_bit_on()
+        {
+            await WhenBlockBSetBit("B0", On);
+            await BlockShouldSetBit("B0", On);
+        }
+
+        [Test]
+        public void blockB_set_bit_on_fail()
+        {
+            SetBitShouldThrowException("B0", On);
+        }
+
+        [Test]
+        public async Task blockD_get_bit()
+        {
+            GivenBlockDBit("D10.1", On);
+            await BitShouldBe("D10.1", On);
+        }
+
+        [Test]
+        public async Task blockD_read_word()
+        {
+            GivenBlockDWord("D100", 10);
+            await WordShouldBe("D100", 10);
+        }
+
+        [Test]
+        public async Task blockD_read_words()
+        {
+            GivenBlockDWords("D100", 2, new[] { 10, 11 });
+            await WordsShouldBe("D100", 2, new[] { 10, 11 });
+        }
+
+        [Test]
+        public async Task blockD_write_word()
+        {
+            GivenSetWordSuccess("D100");
+            await WhenMPLCWriteWord("D100", 10);
+            await BlockDShouldBeSetWord("D100", 10);
+        }
+
+        [Test]
+        public void blockD_write_word_fail()
+        {
+            GivenSetWordSuccess("D100");
+            MPLCWriteWordShouldThrowException("D101", 10);
+        }
+
+        [Test]
+        public async Task blockD_write_words()
+        {
+            GivenSetWordsSuccess("D100");
+            await WhenMPLCWriteWords("D100", new[] { 10, 11 });
+            await BlockDShouldBeSetWords("D100", new[] { 10, 11 });
+        }
+
+        [Test]
+        public void blockD_write_words_fail()
+        {
+            GivenSetWordsSuccess("D100");
+            MPLCWriteWordsShouldThrowException("D101", new[] { 10, 11 });
+        }
+
+        private async Task BitShouldBe(string address, bool expected)
+        {
+            var actual = await _mplc.GetBitAsync(address);
+            actual.Should().Be(expected);
+        }
+
+        private async Task BlockDShouldBeSetWord(string address, int value)
+        {
+            await _blockD.Received(1).TrySetWordAsync(Arg.Is(address), Arg.Is(value));
+        }
+
+        private async Task BlockDShouldBeSetWords(string address, int[] data)
+        {
+            await _blockD.Received(1).TrySetWordsAsync(
+                Arg.Is(address),
+                Arg.Is<int[]>(x => x[0] == data[0] && x[1] == data[1]));
+        }
+
+        private async Task BlockShouldSetBit(string address, bool value)
+        {
+            await _blockB.Received(1).TrySetBitAsync(Arg.Is(address), Arg.Is(value));
+        }
+
+        private void GivenBlockB(string address, bool value)
+        {
+            _blockB.TryGetBitAsync(address)
+                .Returns((true, value));
+        }
+
+        private void GivenBlockDBit(string address, bool value)
+        {
+            _blockD.TryGetBitAsync(address)
+                .Returns((true, value));
+        }
+
+        private void GivenBlockDWord(string address, int value)
+        {
+            _blockD.TryGetWordAsync(address)
+                .Returns((true, value));
+        }
+
+        private void GivenBlockDWords(string startAddress, int length, int[] data)
+        {
+            _blockD.TryGetWordsAsync(startAddress, length)
+                .Returns((true, data));
+        }
+
+        private void GivenSetWordsSuccess(string startAddress)
+        {
+            _blockD.TrySetWordsAsync(startAddress, Arg.Any<int[]>())
                 .Returns(true);
-
-            _mplc.SetBitOn("B0");
-
-            _blockB.Received().TrySetBitOn(Arg.Is("B0"));
         }
 
-        [Test]
-        public async Task set_bit_on_async()
+        private void GivenSetWordSuccess(string address)
         {
-            _blockB.TrySetBitOnAsync("B0")
+            _blockD.TrySetWordAsync(address, Arg.Any<int>())
                 .Returns(true);
-
-            await _mplc.SetBitOnAsync("B0");
-
-            await _blockB.Received().TrySetBitOnAsync(Arg.Is("B0"));
         }
 
-        [Test]
-        public void set_bit_on_fail()
+        private void MPLCWriteWordShouldThrowException(string address, int value)
         {
-            _blockB.TrySetBitOn("B0")
-                .Returns(true);
-
-            Action act = () => _mplc.SetBitOn("B1");
+            Func<Task> act = async () => await _mplc.WriteWordAsync(address, value);
 
             act.Should().Throw<InvalidOperationException>()
                 .Where(e => e.Message.Contains("no match block"));
         }
 
-        [Test]
-        public void set_bit_off()
+        private void MPLCWriteWordsShouldThrowException(string startAddress, int[] data)
         {
-            _blockB.TrySetBitOff("B0")
-                .Returns(true);
-
-            _mplc.SetBitOff("B0");
-
-            _blockB.Received().TrySetBitOff(Arg.Is("B0"));
-        }
-
-        [Test]
-        public async Task set_bit_off_async()
-        {
-            _blockB.TrySetBitOffAsync("B0")
-                .Returns(true);
-
-            await _mplc.SetBitOffAsync("B0");
-
-            await _blockB.Received().TrySetBitOffAsync(Arg.Is("B0"));
-        }
-
-        [Test]
-        public void set_bit_off_fail()
-        {
-            _blockB.TrySetBitOff("B0")
-                .Returns(true);
-
-            Action act = () => _mplc.SetBitOff("B1");
+            Func<Task> act = async () => await _mplc.WriteWordsAsync(startAddress, data);
 
             act.Should().Throw<InvalidOperationException>()
                 .Where(e => e.Message.Contains("no match block"));
         }
 
-        [Test]
-        public void read_word()
+        private void SetBitShouldThrowException(string address, bool isOn)
         {
-            _blockD.TryGetWord("D100", out Arg.Any<int>())
-                .Returns(param =>
-                {
-                    param[1] = 10;
-                    return true;
-                });
-
-            var actual = _mplc.ReadWord("D100");
-
-            actual.Should().Be(10);
-        }
-
-        [Test]
-        public async Task read_word_async()
-        {
-            _blockD.TryGetWordAsync("D100")
-                .Returns((true, 10));
-
-            var actual = await _mplc.ReadWordAsync("D100");
-
-            actual.Should().Be(10);
-        }
-
-        [Test]
-        public void read_word_fail()
-        {
-            _blockD.TryGetWord("D100", out Arg.Any<int>())
-                .Returns(param =>
-                {
-                    param[1] = 10;
-                    return true;
-                });
-
-            Action act = () => _mplc.ReadWord("D101");
+            Func<Task> act = async () => await _mplc.SetBitAsync(address, isOn);
 
             act.Should().Throw<InvalidOperationException>()
                 .Where(e => e.Message.Contains("no match block"));
         }
 
-        [Test]
-        public void write_word()
+        private async Task WhenBlockBSetBit(string address, bool isOn)
         {
-            _blockD.TrySetWord("D100", Arg.Any<int>())
+            _blockB.TrySetBitAsync(address, isOn)
                 .Returns(true);
 
-            _mplc.WriteWord("D100", 10);
+            await _mplc.SetBitAsync(address, isOn);
         }
 
-        [Test]
-        public async Task write_word_async()
+        private async Task WhenMPLCWriteWord(string address, int value)
         {
-            _blockD.TrySetWordAsync("D100", Arg.Any<int>())
-                .Returns(true);
-
-            await _mplc.WriteWordAsync("D100", 10);
+            await _mplc.WriteWordAsync(address, value);
         }
 
-        [Test]
-        public void write_word_fail()
+        private async Task WhenMPLCWriteWords(string startAddress, int[] data)
         {
-            _blockD.TrySetWord("D100", Arg.Any<int>())
-                .Returns(true);
-
-            Action act = () => _mplc.WriteWord("D101", 10);
-
-            act.Should().Throw<InvalidOperationException>()
-                .Where(e => e.Message.Contains("no match block"));
+            await _mplc.WriteWordsAsync(startAddress, data);
         }
 
-        [Test]
-        public void reads_word()
+        private async Task WordShouldBe(string address, int expected)
         {
-            _blockD.TryGetWords("D100", 2, out Arg.Any<int[]>())
-                .Returns(param =>
-                {
-                    param[2] = new[] { 10, 11 };
-                    return true;
-                });
+            var actual = await _mplc.ReadWordAsync(address);
 
-            var actual = _mplc.ReadWords("D100", 2);
-
-            actual.Should().BeEquivalentTo(new[] { 10, 11 });
+            actual.Should().Be(expected);
         }
 
-        [Test]
-        public async Task reads_word_async()
+        private async Task WordsShouldBe(string startAddress, int length, int[] expected)
         {
-            _blockD.TryGetWordsAsync("D100", 2)
-                .Returns((true, new[] { 10, 11 }));
+            var actual = await _mplc.ReadWordsAsync(startAddress, length);
 
-            var actual = await _mplc.ReadWordsAsync("D100", 2);
-
-            actual.Should().BeEquivalentTo(new[] { 10, 11 });
-        }
-
-        [Test]
-        public void reads_word_fail()
-        {
-            _blockD.TryGetWords("D100", 2, out Arg.Any<int[]>())
-                .Returns(param =>
-                {
-                    param[2] = new[] { 10, 11 };
-                    return true;
-                });
-
-            Action act = () => _mplc.ReadWord("D101");
-
-            act.Should().Throw<InvalidOperationException>()
-                .Where(e => e.Message.Contains("no match block"));
-        }
-
-        [Test]
-        public void writes_word()
-        {
-            _blockD.TrySetWords("D100", Arg.Any<int[]>())
-                .Returns(true);
-
-            _mplc.WriteWords("D100", new[] { 10, 11 });
-        }
-
-        [Test]
-        public async Task write_words_async()
-        {
-            _blockD.TrySetWordsAsync("D100", Arg.Any<int[]>())
-                .Returns(true);
-
-            await _mplc.WriteWordsAsync("D100", new[] { 10, 11 });
-        }
-
-        [Test]
-        public void write_words_fail()
-        {
-            _blockD.TrySetWords("D100", Arg.Any<int[]>())
-                .Returns(true);
-
-            Action act = () => _mplc.WriteWords("D101", new[] { 10, 11 });
-
-            act.Should().Throw<InvalidOperationException>()
-                .Where(e => e.Message.Contains("no match block"));
+            actual.Should().BeEquivalentTo(expected);
         }
     }
 }

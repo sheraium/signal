@@ -21,38 +21,15 @@ namespace MPLC
 
         public string Address => _address;
 
-        public double Value => GetValue();
-
-        public bool GetBit(int index)
-        {
-            if (index < 0 || index >= 16) return false;
-            return new BitArray(BitConverter.GetBytes(GetValue())).Get(index);
-        }
-
         public async Task<bool> GetBitAsync(int index)
         {
             if (index < 0 || index >= 16) return false;
             return new BitArray(BitConverter.GetBytes(await GetValueAsync())).Get(index);
         }
 
-        public int GetValue()
+        public Task<int> GetValueAsync()
         {
-            return _mplc.ReadWord(_address);
-        }
-
-        public async Task<int> GetValueAsync()
-        {
-            return await _mplc.ReadWordAsync(_address);
-        }
-
-        public void SetBit(int index, bool isOn)
-        {
-            if (index < 0 || index >= 16) return;
-            var bitArray = new BitArray(BitConverter.GetBytes(GetValue()));
-            bitArray.Set(index, isOn);
-            var bytes = new byte[4];
-            bitArray.CopyTo(bytes, 0);
-            SetValue(BitConverter.ToInt16(bytes));
+            return _mplc.ReadWordAsync(_address);
         }
 
         public async Task SetBitAsync(int index, bool isOn)
@@ -62,17 +39,12 @@ namespace MPLC
             bitArray.Set(index, isOn);
             var bytes = new byte[4];
             bitArray.CopyTo(bytes, 0);
-            SetValue(BitConverter.ToInt16(bytes));
+            await SetValueAsync(BitConverter.ToUInt16(bytes, 0));
         }
 
-        public void SetValue(int value)
+        public Task SetValueAsync(int value)
         {
-            _mplc.WriteWord(_address, value);
-        }
-
-        public async Task SetValueAsync(int value)
-        {
-            await _mplc.WriteWordAsync(_address, value);
+            return _mplc.WriteWordAsync(_address, value);
         }
     }
 }

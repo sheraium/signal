@@ -1,12 +1,16 @@
+using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 
 namespace MPLC.UnitTests
 {
+    [TestFixture]
     public class BitTests
     {
         private const string BitAddress = "D100.1";
+        private const bool Off = false;
+        private const bool On = true;
         private Bit _bit;
         private IMPLCProvider _mplc;
 
@@ -18,79 +22,77 @@ namespace MPLC.UnitTests
         }
 
         [Test]
-        public void set_on()
+        public async Task bit_is_off()
         {
-            _bit.SetOn();
-
-            _mplc.Received().SetBitOn(Arg.Is(BitAddress));
+            GivenBit(BitAddress, Off);
+            await BitShouldBe(Off);
         }
 
         [Test]
-        public void set_off()
+        public async Task bit_is_on()
         {
-            _bit.SetOff();
-
-            _mplc.Received().SetBitOff(Arg.Is(BitAddress));
+            GivenBit(BitAddress, On);
+            await BitShouldBe(On);
         }
 
         [Test]
-        public void set_isOn()
+        public async Task set_bit_off()
         {
-            var isOn = true;
-            _bit.Set(isOn);
-
-            _mplc.Received().SetBitOn(Arg.Is(BitAddress));
+            await WhenSetOff();
+            await MPLCShouldBeSetBit(BitAddress, Off);
         }
 
         [Test]
-        public void set_isOff()
+        public async Task set_it_off()
         {
-            var isOn = false;
-            _bit.Set(isOn);
-
-            _mplc.Received().SetBitOff(Arg.Is(BitAddress));
+            await WhenSetBit(Off);
+            await MPLCShouldBeSetBit(BitAddress, Off);
         }
 
-
         [Test]
-        public void isOn()
+        public async Task set_it_on()
         {
-            _mplc.GetBit(BitAddress).Returns(true);
-
-            var actual = _bit.IsOn();
-
-            actual.Should().BeTrue();
+            await WhenSetBit(On);
+            await MPLCShouldBeSetBit(BitAddress, On);
         }
 
-
         [Test]
-        public void isOff()
+        public async Task set_on()
         {
-            _mplc.GetBit(BitAddress).Returns(true);
-
-            var actual = _bit.IsOff();
-
-            actual.Should().BeFalse();
+            await WhenSetOn();
+            await MPLCShouldBeSetBit(BitAddress, On);
         }
 
-
-        [Test]
-        public void value()
+        private async Task BitShouldBe(bool expected)
         {
-            _mplc.GetBit(BitAddress).Returns(true);
+            var actual = await _bit.IsOnAsync();
 
-            var actual = _bit.Value;
-
-            actual.Should().Be(1);
+            actual.Should().Be(expected);
         }
 
-
-        [Test]
-        public void address()
+        private void GivenBit(string address, bool isOn)
         {
-            var actual = _bit.Address;
+            _mplc.GetBitAsync(address).Returns(isOn);
+        }
 
-            actual.Should().Be(BitAddress);
+        private async Task MPLCShouldBeSetBit(string address, bool isOn)
+        {
+            await _mplc.Received().SetBitAsync(Arg.Is(address), Arg.Is(isOn));
+        }
+
+        private async Task WhenSetBit(bool isOn)
+        {
+            await _bit.SetAsync(isOn);
+        }
+
+        private async Task WhenSetOff()
+        {
+            await _bit.SetOffAsync();
+        }
+
+        private async Task WhenSetOn()
+        {
+            await _bit.SetOnAsync();
         }
     }
 }

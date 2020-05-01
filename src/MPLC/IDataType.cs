@@ -2,7 +2,7 @@ namespace MPLC
 {
     public interface IDataType
     {
-        double Value { get; }
+        //double Value { get; }
 
         string Address { get; }
     }
